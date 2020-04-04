@@ -18,4 +18,4 @@ guile-hexdump is my simple implementation of hexdump (hexdump -C <file>) in guil
 I'm going to add new features in this project.
 
 ##### Usage:
-` ./hexdump.scm <filename>`
+` ./guile-hexdump.scm <filename>`
