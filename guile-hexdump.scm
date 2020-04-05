@@ -1,3 +1,6 @@
+#!/usr/bin/guile  -s
+!#
+
 ; Copyright (C) 2020 Neetx
 ; This file is part of guile-hexdump.
 ;
@@ -14,17 +17,13 @@
 ; You should have received a copy of the GNU General Public License
 ; along with guile-hexdump.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#!/usr/bin/guile  -s
-!#
-
 (use-modules (ice-9 binary-ports))
 (use-modules (ice-9 format))
 (use-modules (rnrs bytevectors))
 (use-modules (rnrs base))
 
 ;-----------------------------------------------------------------------------------------------------------------------------
-(define bytevector_to_hex_list			   ;INPUT:bytevector -> OUTPUT: List of string, each one is a 16 bytes hex
+(define bytevector-to-hex-list			   ;INPUT:bytevector -> OUTPUT: List of string, each one is a 16 bytes hex
     (lambda (v)
         (map 
             (lambda(x)
@@ -32,7 +31,7 @@
             )
             (bytevector->u8-list v))))
 
-(define bytevector_to_ascii_list  			;INPUT:bytevector -> OUTPUT: List of string, each one is an ascii char
+(define bytevector-to-ascii-list  			;INPUT:bytevector -> OUTPUT: List of string, each one is an ascii char
     (lambda (v)
         (map
             (lambda(x)
@@ -42,13 +41,13 @@
                 (bytevector->u8-list v))))
 ;-------------------------------------------------------------------------------------------------------------------------------
 
-(define bytevector_to_hex_string   			;INPUT: bytevector -> OUTPUT: one string of hex  eg."FF FF FF FF"
+(define bytevector-to-hex-string   			;INPUT: bytevector -> OUTPUT: one string of hex  eg."FF FF FF FF"
     (lambda (v)
-        (string-join (bytevector_to_hex_list v))))
+        (string-join (bytevector-to-hex-list v))))
 
-(define bytevector_to_ascii_string 			;INPUT; bytevector -> OUTPUT: one string of ascii char eg. "q w e r t y"
+(define bytevector-to-ascii-string 			;INPUT; bytevector -> OUTPUT: one string of ascii char eg. "q w e r t y"
     (lambda (v)
-        (string-join (bytevector_to_ascii_list v))))
+        (string-join (bytevector-to-ascii-list v))))
 ;--------------------------------------------------------------------------------------------------------------------------------
 
 (define printhexascii
@@ -59,10 +58,10 @@
             (begin
                 (display (format #f "~8,,,'0@a" (number->string l 16)))
                 (display "  ")
-                (display (bytevector_to_hex_string i))
+                (display (bytevector-to-hex-string i))
                 (if (< (bytevector-length i) 16) (display (format #f "~v{~A~:*~}" (*(- 16 (bytevector-length i)) 3) '(" "))))  ;last raw format handling
                 (display "  |")
-                (display (string-delete #\space (bytevector_to_ascii_string i)))
+                (display (string-delete #\space (bytevector-to-ascii-string i)))
                 (display "|")
                 (newline)
                 (printhexascii file (+ l 1))))))
