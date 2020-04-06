@@ -21,6 +21,7 @@
 (use-modules (ice-9 format))
 (use-modules (rnrs bytevectors))
 (use-modules (rnrs base))
+(use-modules (ice-9 exceptions))
 
 ;-----------------------------------------------------------------------------------------------------------------------------
 (define bytevector-to-hex-list			   ;INPUT:bytevector -> OUTPUT: List of string, each one is a 16 bytes hex
@@ -70,31 +71,24 @@
     (lambda ()
         (display "Usage: hexdump <filename>\n")))
 
-(define-syntax try
-    (syntax-rules (catch)
-        ((_ body (catch catcher))
-            (call-with-current-continuation
-                (lambda (exit)
-                    (with-exception-handler
-                        (lambda (condition)
-                            catcher
-                            (exit condition))
-                        (lambda () body)))))))
-
 (define input (program-arguments)) ;TODO: Argparse
 
-(if (<= (length input) 1)
+(if (<= (length input) 1)          ;Without arguments the program ends
     (begin
         (display "ERROR: Please insert a file name.\n")
-        (help)))
-
-(define file (list-ref input 1))
-
-(try 
-    (begin 
-        (define binaryfile (open-file file "rb"))
-        (printhexascii binaryfile 0))
-    (catch
-        (begin
-            (display "ERROR: File not found\n")
-            (help))))
+        (help))
+    (begin
+    (call-with-current-continuation
+        (lambda (exit)
+            (with-exception-handler
+                (lambda (condition)
+                    (display "ERROR: ")
+                    (if (exception-with-irritants? condition) 				;check if irritants exists
+                        (begin
+                            (display (car (exception-irritants condition))) ; print error
+                            (newline)))
+                    (help)
+                    (exit condition))
+                (lambda ()
+                    (printhexascii (open-file (list-ref input 1) "rb") 0)	;the first in input is the file to open
+                    (exit)))))))
