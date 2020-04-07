@@ -78,7 +78,10 @@
                 (lambda (exit)
                     (with-exception-handler
                         (lambda (condition)
-                            (display  (exception-irritants condition)) (newline) ;TODO: use format with exception-message and exception-irritants
+                            (display "ERROR:")
+                            (if (exception-with-irritants? condition)       ;check if irritants exists
+                                (display  (exception-irritants condition))) ;TODO: use format with exception-message and exception-irritants
+                            (newline)
                             catcher
                             (exit condition))
                         (lambda () body)))))))
@@ -95,5 +98,4 @@
                 (define binaryfile (open-file (list-ref input 1) "rb"))
                 (printhexascii binaryfile 0))
             (catch
-                (begin
-                    (help))))))
+                    (help)))))
