@@ -71,24 +71,29 @@
     (lambda ()
         (display "Usage: hexdump <filename>\n")))
 
+(define-syntax try
+    (syntax-rules (catch)
+        ((_ body (catch catcher))
+            (call-with-current-continuation
+                (lambda (exit)
+                    (with-exception-handler
+                        (lambda (condition)
+                            (display  (exception-irritants condition)) (newline) ;TODO: use format with exception-message and exception-irritants
+                            catcher
+                            (exit condition))
+                        (lambda () body)))))))
+
 (define input (program-arguments)) ;TODO: Argparse
 
-(if (<= (length input) 1)          ;Without arguments the program ends
+(if (<= (length input) 1)          ;Without arguments the program ends, try catch otherwise
     (begin
         (display "ERROR: Please insert a file name.\n")
         (help))
     (begin
-    (call-with-current-continuation
-        (lambda (exit)
-            (with-exception-handler
-                (lambda (condition)
-                    (display "ERROR: ")
-                    (if (exception-with-irritants? condition) 				;check if irritants exists
-                        (begin
-                            (display (car (exception-irritants condition))) ; print error
-                            (newline)))
-                    (help)
-                    (exit condition))
-                (lambda ()
-                    (printhexascii (open-file (list-ref input 1) "rb") 0)	;the first in input is the file to open
-                    (exit)))))))
+        (try 
+            (begin 
+                (define binaryfile (open-file (list-ref input 1) "rb"))
+                (printhexascii binaryfile 0))
+            (catch
+                (begin
+                    (help))))))
